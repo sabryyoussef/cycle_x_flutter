@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "951086348501",
-    "project_id": "wastewise-7b983",
-    "storage_bucket": "wastewise-7b983.appspot.com"
+    "project_number": "819394823024",
+    "project_id": "delivery-dispatcher-uaq3k",
+    "storage_bucket": "delivery-dispatcher-uaq3k.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:951086348501:android:d823304e80cdae16ef8a5c",
+        "mobilesdk_app_id": "1:819394823024:android:513aa69f76bd1bb6ca05b5",
         "android_client_info": {
-          "package_name": "com.example.shoppingapp"
+          "package_name": "com.sabry.cyclex"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDlGabbjamaECTAvmBO_UPHDKFUwzXSeiY"
+          "current_key": "AIzaSyARXArUFlgDvMOYXsfyR9TKj5hmuHqeiJw"
         }
       ],
       "services": {

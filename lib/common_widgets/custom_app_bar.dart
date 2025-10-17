@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:user_repository/user_repository.dart'; // Make sure you are using Provider for state management
 import 'package:waste_wise/utils/provider_utils.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
@@ -16,8 +17,12 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     // Fetch the cart item count using Provider
     final userRepo = ProviderUtils.getUserRepository(context);
-    final user = userRepo.currentUser;
-    final cartItemCount = user != null 
+    // Handle both FirebaseUserRepo and MockUserRepo
+    User? user;
+    if (userRepo is FirebaseUserRepo) {
+      user = userRepo.currentUser;
+    }
+    final cartItemCount = user != null
         ? Provider.of<FirebaseCartRepo>(context).getCartItemCount(user.uid)
         : Stream.value(0);
 
@@ -27,7 +32,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           leading: name == 'Recycled Products' || name == 'Profile'
               ? null
               : Container(
-                
                   margin: const EdgeInsets.only(left: 10, bottom: 5, top: 5),
                   child: IconButton(
                     iconSize: 20,
@@ -59,7 +63,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 23.0,
-                        
                         color: name == 'Details'
                             ? Colors.white
                             : Colors.green[900])),

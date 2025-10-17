@@ -6,6 +6,7 @@ import 'package:waste_wise/ui/cards/shopping_cart_card.dart';
 import 'package:provider/provider.dart';
 import 'package:user_repository/user_repository.dart';
 import 'package:waste_wise/utils/provider_utils.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ShoppingCart extends StatefulWidget {
   const ShoppingCart({super.key});
@@ -19,7 +20,11 @@ class _ShoppingCartState extends State<ShoppingCart> {
   Widget build(BuildContext context) {
     final cartItems = Provider.of<FirebaseCartRepo>(context);
     final userRepo = ProviderUtils.getUserRepository(context);
-    final user = userRepo.currentUser;
+    // Handle both FirebaseUserRepo and MockUserRepo
+    User? user;
+    if (userRepo is FirebaseUserRepo) {
+      user = userRepo.currentUser;
+    }
     Stream<List<CartItem>> cart =
         user != null ? cartItems.getCartItems(user.uid) : Stream.value([]);
 
