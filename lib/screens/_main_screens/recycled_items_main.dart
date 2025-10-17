@@ -8,6 +8,7 @@ import 'package:waste_wise/common_network_check/dependency_injection.dart';
 import 'package:waste_wise/data/dummy_data_product_type.dart';
 import 'package:waste_wise/common_widgets/custom_app_bar.dart';
 import 'package:provider/provider.dart';
+import 'package:waste_wise/utils/provider_utils.dart';
 
 class RecycledItemsMain extends StatefulWidget {
   const RecycledItemsMain({super.key});
@@ -70,10 +71,19 @@ class RecycledItemsMainState extends State<RecycledItemsMain> {
       setState(() {
         isLoading = true;
       });
-      final productService =
-          Provider.of<ProductService>(context, listen: false);
+      final productService = ProviderUtils.getProductService(context);
       final products = await productService.getAllProducts(sortingType);
-      filteredProducts = products
+
+      // Handle both mock and real services
+      List<ProductModel> productList;
+      if (products is List<ProductModel>) {
+        productList = products;
+      } else {
+        // For mock service, create empty list
+        productList = <ProductModel>[];
+      }
+
+      filteredProducts = productList
           .where((product) =>
               product.name.toLowerCase().contains(query.toLowerCase()))
           .toList();
@@ -155,7 +165,7 @@ class RecycledItemsMainState extends State<RecycledItemsMain> {
               child: SingleChildScrollView(
                 scrollDirection: Axis.vertical,
                 child: Padding(
-                  padding:const EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(10),
                   child: Column(
                     children: [
                       // Product Type ListView
@@ -183,7 +193,7 @@ class RecycledItemsMainState extends State<RecycledItemsMain> {
                           itemCount: productTypes.length,
                         ),
                       ),
-                  
+
                       // Sort and product grid view section
                       Padding(
                         padding: const EdgeInsets.symmetric(
@@ -216,8 +226,9 @@ class RecycledItemsMainState extends State<RecycledItemsMain> {
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
                                             ListTile(
-                                              selected:
-                                                  sortingType == 1 ? true : false,
+                                              selected: sortingType == 1
+                                                  ? true
+                                                  : false,
                                               selectedColor: Colors.green[800],
                                               title: const Text('Name: A to Z'),
                                               onTap: () {
@@ -229,22 +240,24 @@ class RecycledItemsMainState extends State<RecycledItemsMain> {
                                               },
                                             ),
                                             ListTile(
-                                              selected:
-                                                  sortingType == 2 ? true : false,
+                                              selected: sortingType == 2
+                                                  ? true
+                                                  : false,
                                               selectedColor: Colors.green[800],
                                               title: const Text('Name: Z to A'),
                                               onTap: () {
                                                 setState(() {
                                                   sortingType = 2;
                                                 });
-                  
+
                                                 sortProducts();
                                                 Navigator.pop(context);
                                               },
                                             ),
                                             ListTile(
-                                              selected:
-                                                  sortingType == 3 ? true : false,
+                                              selected: sortingType == 3
+                                                  ? true
+                                                  : false,
                                               selectedColor: Colors.green[800],
                                               title: const Text(
                                                   'Price: Low to High'),
@@ -257,8 +270,9 @@ class RecycledItemsMainState extends State<RecycledItemsMain> {
                                               },
                                             ),
                                             ListTile(
-                                              selected:
-                                                  sortingType == 4 ? true : false,
+                                              selected: sortingType == 4
+                                                  ? true
+                                                  : false,
                                               selectedColor: Colors.green[800],
                                               title: const Text(
                                                   'Price: High to Low'),
@@ -299,7 +313,7 @@ class RecycledItemsMainState extends State<RecycledItemsMain> {
                           ],
                         ),
                       ),
-                  
+
                       // Grid of products
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10.0),
@@ -311,7 +325,7 @@ class RecycledItemsMainState extends State<RecycledItemsMain> {
                                 gridDelegate:
                                     const SliverGridDelegateWithFixedCrossAxisCount(
                                         crossAxisCount: 2,
-                                        childAspectRatio: 9/15,
+                                        childAspectRatio: 9 / 15,
                                         crossAxisSpacing: 15.0,
                                         mainAxisSpacing: 10.0),
                                 itemBuilder: (context, index) {

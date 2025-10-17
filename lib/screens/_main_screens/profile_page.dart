@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:user_repository/user_repository.dart';
 import 'package:provider/provider.dart';
+import 'package:waste_wise/utils/provider_utils.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({
@@ -30,7 +31,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    final userRepo = Provider.of<FirebaseUserRepo>(context, listen: false);
+    final userRepo = ProviderUtils.getUserRepository(context);
 
     return Scaffold(
       backgroundColor: Colors.transparent,

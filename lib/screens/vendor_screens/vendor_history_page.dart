@@ -1,4 +1,6 @@
 import 'dart:async'; // Import to use Timer
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:transaction_repository/transaction_repository.dart';
 
@@ -10,7 +12,11 @@ class VendorHistoryPage extends StatefulWidget {
 }
 
 class _VendorHistoryPageState extends State<VendorHistoryPage> {
-  final FirebaseTransactions _firebaseTransactions = FirebaseTransactions();
+  // Use mock on unsupported platforms
+  final dynamic _transactionRepo =
+      (!kIsWeb && (Platform.isLinux || Platform.isWindows))
+          ? MockTransactions()
+          : FirebaseTransactions();
 
   String searchQuery = '';
   String sortOption = "Recent";
@@ -22,7 +28,7 @@ class _VendorHistoryPageState extends State<VendorHistoryPage> {
 
   // Fetching transactions
   Future<List<TransactionsModel>> _fetchTransactions() async {
-    return await _firebaseTransactions.fetchTransactions();
+    return await _transactionRepo.fetchTransactions();
   }
 
   // Function to filter and sort transactions

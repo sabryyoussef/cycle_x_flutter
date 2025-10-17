@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:user_repository/user_repository.dart';
 import 'package:provider/provider.dart';
+import 'package:waste_wise/utils/provider_utils.dart';
 
 class LoginChecker extends StatelessWidget {
   const LoginChecker({super.key, required this.routeName});
@@ -9,14 +10,14 @@ class LoginChecker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final userRepo = Provider.of<FirebaseUserRepo>(context);
+    final userRepo = ProviderUtils.getUserRepository(context);
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: StreamBuilder<MyUser>(
         stream: userRepo.user,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return  Center(
+            return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -27,16 +28,18 @@ class LoginChecker extends StatelessWidget {
                       height: 150,
                     ),
                   ),
-                  const SizedBox(height: 40,),
+                  const SizedBox(
+                    height: 40,
+                  ),
                   const SizedBox(
                     width: 30.0, // Set width
                     height: 30.0, // Set height
                     child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                          Color.fromARGB(255, 44, 113, 47)), // Color of the indicator
+                      valueColor: AlwaysStoppedAnimation<Color>(Color.fromARGB(
+                          255, 44, 113, 47)), // Color of the indicator
                       strokeWidth: 4.0, // Width of the indicator stroke
-                      backgroundColor:
-                          Colors.transparent, // Background color behind the indicator
+                      backgroundColor: Colors
+                          .transparent, // Background color behind the indicator
                     ),
                   ),
                 ],

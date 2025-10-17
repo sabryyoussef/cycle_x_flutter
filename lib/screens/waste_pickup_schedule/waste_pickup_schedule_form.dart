@@ -1,4 +1,5 @@
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
@@ -6,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import '../../services/mock_waste_pickup_service.dart';
 
 const List<String> list = <String>[
   'E-Waste',
@@ -33,6 +35,9 @@ class _WastePickupScheduleFormState extends State<WastePickupScheduleForm> {
   late String longitude = '';
   File? _imageFile;
 
+  // Use mock service on unsupported platforms
+  final MockWastePickupService _mockService = MockWastePickupService();
+
   @override
   void initState() {
     super.initState();
@@ -43,6 +48,25 @@ class _WastePickupScheduleFormState extends State<WastePickupScheduleForm> {
   }
 
   Future<void> _pickImage() async {
+    // On Linux, simulate image picker
+    if (!kIsWeb && (Platform.isLinux || Platform.isWindows)) {
+      if (kDebugMode) {
+        print(
+            'MockWastePickupService: Image picker simulated (no-op on this platform)');
+      }
+      // Simulate selecting an image
+      setState(() {
+        _imageFile = File('/tmp/mock_waste_image.jpg');
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Mock image selected for demo purposes'),
+          backgroundColor: Colors.blue,
+        ),
+      );
+      return;
+    }
+
     final pickedFile =
         await ImagePicker().pickImage(source: ImageSource.camera);
 
@@ -74,6 +98,7 @@ class _WastePickupScheduleFormState extends State<WastePickupScheduleForm> {
     String address = addressController.text;
     String phone = phoneController.text;
     String description = descriptionController.text;
+
     // Validate fields
     if (scheduledDate == "Choose date" || address.isEmpty || phone.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -82,44 +107,33 @@ class _WastePickupScheduleFormState extends State<WastePickupScheduleForm> {
           backgroundColor: Colors.red,
         ),
       );
-    } else {
-      String? imageUrl;
-      if (_imageFile != null) {
-        // Upload the image to Firebase Storage
-        try {
-          final ref = FirebaseStorage.instance
-              .ref()
-              .child('waste_pickups/${DateTime.now().toIso8601String()}');
-          await ref.putFile(_imageFile!);
-          imageUrl = await ref.getDownloadURL(); // Get the download URL
-        } catch (e) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Failed to upload image: $e'),
-              backgroundColor: Colors.red,
-            ),
-          );
-          return;
-        }
-      }
+      return;
+    }
+
+    // Use mock service on unsupported platforms
+    if (!kIsWeb && (Platform.isLinux || Platform.isWindows)) {
       try {
-        await FirebaseFirestore.instance.collection('waste_pickups').add({
-          'wasteType': wasteType,
-          'scheduledDate': scheduledDate,
-          'address': address,
-          'phone': phone,
-          'imageUrl': imageUrl,
-          'latitude': latitude,
-          'longitude': longitude,
-          'description': description,
-          'timestamp': FieldValue.serverTimestamp(),
-        });
+        String? imageUrl;
+        if (_imageFile != null) {
+          imageUrl = 'mock_image_url_${DateTime.now().millisecondsSinceEpoch}';
+        }
+
+        await _mockService.schedulePickup(
+          wasteType: wasteType,
+          scheduledDate: scheduledDate,
+          address: address,
+          phone: phone,
+          description: description,
+          latitude: latitude,
+          longitude: longitude,
+          imageUrl: imageUrl,
+        );
 
         Navigator.pop(context);
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Waste pickup scheduled successfully!'),
+            content: Text('Waste pickup scheduled successfully! (Demo Mode)'),
             backgroundColor: Colors.green,
           ),
         );
@@ -131,10 +145,67 @@ class _WastePickupScheduleFormState extends State<WastePickupScheduleForm> {
           ),
         );
       }
+      return;
+    }
+
+    // Original Firebase implementation for supported platforms
+    String? imageUrl;
+    if (_imageFile != null) {
+      // Upload the image to Firebase Storage
+      try {
+        final ref = FirebaseStorage.instance
+            .ref()
+            .child('waste_pickups/${DateTime.now().toIso8601String()}');
+        await ref.putFile(_imageFile!);
+        imageUrl = await ref.getDownloadURL(); // Get the download URL
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to upload image: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+    }
+    try {
+      await FirebaseFirestore.instance.collection('waste_pickups').add({
+        'wasteType': wasteType,
+        'scheduledDate': scheduledDate,
+        'address': address,
+        'phone': phone,
+        'imageUrl': imageUrl,
+        'latitude': latitude,
+        'longitude': longitude,
+        'description': description,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      Navigator.pop(context);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Waste pickup scheduled successfully!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to schedule waste pickup: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
   Future<Position> _getCurrentLocation() async {
+    // Use mock location on unsupported platforms
+    if (!kIsWeb && (Platform.isLinux || Platform.isWindows)) {
+      return await _mockService.getCurrentLocation();
+    }
+
+    // Original geolocator implementation for supported platforms
     bool serviceEnabled;
     LocationPermission permission;
 

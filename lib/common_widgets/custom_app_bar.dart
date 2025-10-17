@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:user_repository/user_repository.dart'; // Make sure you are using Provider for state management
+import 'package:waste_wise/utils/provider_utils.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
@@ -14,9 +15,11 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     // Fetch the cart item count using Provider
-    final user = Provider.of<FirebaseUserRepo>(context).currentUser;
-    final cartItemCount =
-        Provider.of<FirebaseCartRepo>(context).getCartItemCount(user!.uid);
+    final userRepo = ProviderUtils.getUserRepository(context);
+    final user = userRepo.currentUser;
+    final cartItemCount = user != null 
+        ? Provider.of<FirebaseCartRepo>(context).getCartItemCount(user.uid)
+        : Stream.value(0);
 
     return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 0),

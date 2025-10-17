@@ -5,6 +5,7 @@ import 'package:waste_wise/ui/cards/address_card.dart';
 import 'package:waste_wise/ui/cards/shopping_cart_card.dart';
 import 'package:provider/provider.dart';
 import 'package:user_repository/user_repository.dart';
+import 'package:waste_wise/utils/provider_utils.dart';
 
 class ShoppingCart extends StatefulWidget {
   const ShoppingCart({super.key});
@@ -17,8 +18,10 @@ class _ShoppingCartState extends State<ShoppingCart> {
   @override
   Widget build(BuildContext context) {
     final cartItems = Provider.of<FirebaseCartRepo>(context);
-    final user = Provider.of<FirebaseUserRepo>(context);
-    Stream<List<CartItem>> cart = cartItems.getCartItems(user.currentUser!.uid);
+    final userRepo = ProviderUtils.getUserRepository(context);
+    final user = userRepo.currentUser;
+    Stream<List<CartItem>> cart =
+        user != null ? cartItems.getCartItems(user.uid) : Stream.value([]);
 
     return BackgroundImageWrapper(
       child: Scaffold(
@@ -74,7 +77,9 @@ class _ShoppingCartState extends State<ShoppingCart> {
             ),
             // Positioned Total Amount at the bottom
             StreamBuilder<double>(
-              stream: cartItems.getTotalPrice(user.currentUser!.uid),
+              stream: user != null
+                  ? cartItems.getTotalPrice(user.uid)
+                  : Stream.value(0.0),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());

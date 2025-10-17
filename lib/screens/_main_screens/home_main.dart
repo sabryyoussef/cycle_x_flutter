@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:user_repository/user_repository.dart';
+import 'package:waste_wise/utils/provider_utils.dart';
 
 class HomeMain extends StatefulWidget {
   const HomeMain({super.key});
@@ -44,7 +45,7 @@ class _HomeMainState extends State<HomeMain> {
 
   @override
   Widget build(BuildContext context) {
-    final userRepo = Provider.of<FirebaseUserRepo>(context, listen: false);
+    final userRepo = ProviderUtils.getUserRepository(context);
 
     // Filter the vendorAds list based on the search query
     final List<Map<String, String>> filteredAds = vendorAds

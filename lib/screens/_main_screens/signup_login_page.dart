@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:waste_wise/common_widgets/background_image_wrapper.dart';
 import 'package:user_repository/user_repository.dart';
 import 'package:provider/provider.dart';
+import 'package:waste_wise/utils/provider_utils.dart';
 
 // Import vendor home screen
 import 'package:waste_wise/screens/_main_screens/vendor_login_page.dart';
@@ -30,7 +31,7 @@ class _SignupLoginPageState extends State<SignupLoginPage> {
           _isLoading = true;
           _errorMessage = null;
         });
-        final userRepo = Provider.of<FirebaseUserRepo>(context, listen: false);
+        final userRepo = ProviderUtils.getUserRepository(context);
         if (isLogin) {
           await userRepo.signInWithEmailAndPassword(
             email: _emailController.text,
